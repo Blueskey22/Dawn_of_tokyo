@@ -16,6 +16,8 @@ public class PlayerController : MonoBehaviour {
 	private bool facingRight = true;
 	private bool jump = false;
 
+	RaycastHit hit;
+
 	private bool _jumped = false;
 	// Use this for initialization
 	void Start () {
@@ -27,9 +29,20 @@ public class PlayerController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		int layerMask = 1 << 8;
+
 		
-		onGround = Physics.Linecast (transform.position, groundCheck.position, 1 << LayerMask.NameToLayer("Ground"));
-		
+		if (Physics.Raycast(transform.position, transform.TransformDirection (-Vector3.up), out hit, 20, layerMask)) 
+		{
+		onGround = false;
+        Debug.DrawRay(transform.position, transform.TransformDirection (Vector3.forward) * hit.distance, Color.yellow);
+        Debug.Log("Did Hit");
+    	}
+		else
+		{
+			onGround = true;
+		}
+
 		if (Input.GetButtonDown ("Jump") && onGround)
 		{
 			jump = true;
