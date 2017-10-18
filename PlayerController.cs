@@ -7,23 +7,29 @@ public class PlayerController : MonoBehaviour {
 
 	public float maxSpeed = 4f;
 	public float jumpForce = 400f;
+	public Sprite spriteAtaque;
+	public Sprite spriteAndar;
+	public SpriteRenderer sr;
+
+	private Sprite ChangeSprite;
 	private float currentSpeed;
 	private Rigidbody body;
 	private Animator anim;
-	private Transform groundCheck;
 	private bool onGround;
 	private bool isDead = false;
 	private bool facingRight = true;
 	private bool jump = false;
 
+	private int hitRange = 10;
+
 	RaycastHit hit;
 
-	private bool _jumped = false;
 	// Use this for initialization
 	void Start () {
 		body = GetComponent<Rigidbody>();
 		anim = GetComponent <Animator>();
-		groundCheck = gameObject.transform.Find ("GroundCheck");
+		//ChangeSprite = GetComponent<Sprite>();
+		sr = GetComponent<SpriteRenderer>();
 		currentSpeed = maxSpeed;
 	}
 	
@@ -32,20 +38,30 @@ public class PlayerController : MonoBehaviour {
 		int layerMask = 1 << 8;
 
 		
-		if (Physics.Raycast(transform.position, transform.TransformDirection (-Vector3.up), out hit, 20, layerMask)) 
+		if (Physics.Raycast(transform.position, transform.TransformDirection (-Vector3.up), out hit, 5, layerMask)) 
 		{
 		onGround = false;
         Debug.DrawRay(transform.position, transform.TransformDirection (Vector3.forward) * hit.distance, Color.yellow);
-        Debug.Log("Did Hit");
+        //Debug.Log("Did Hit");
     	}
 		else
 		{
 			onGround = true;
 		}
 
-		if (Input.GetButtonDown ("Jump") && onGround)
+
+		float j = Input.GetAxis ("Jump");
+		if (j > 0 && onGround)
 		{
 			jump = true;
+		}
+
+		//ATTACK
+
+		if (Input.GetButtonDown ("Fire1"))
+		{
+			Debug.Log ("Atacando");
+			Attack();
 		}
 	}
 
@@ -55,15 +71,21 @@ public class PlayerController : MonoBehaviour {
 		{
 			float h = Input.GetAxis ("Horizontal");
 			float v = Input.GetAxis ("Vertical");
-			//error
+			
 			if (!onGround)
 			{
 				v = 0;
 			}
-			//
+			
 			if (h != 0 || v != 0)
 			{
 			body.velocity = new Vector3 (h * currentSpeed, body.velocity.y, v * currentSpeed);
+			sr.sprite = spriteAndar;
+			}
+			if (h == 0 && v == 0)
+			{
+				h = 0;
+				v = 0;
 			}
 			if (h > 0 && !facingRight)
 			{
@@ -89,5 +111,26 @@ public class PlayerController : MonoBehaviour {
 		Vector3 scale = transform.localScale;
 		scale.x *= -1;
 		transform.localScale = scale;
+	}
+
+	void Attack()
+	{
+		RaycastHit hit1;
+		Vector3 forward =Vector3.up;
+		Vector3 origen = transform.position;
+
+		sr.sprite = spriteAtaque;
+
+		if (Physics.Raycast(origen, forward, out hit1, hitRange))
+		{
+			Debug.Log("primer IF");
+			if (transform.gameObject.tag == "Enemy")
+         	{
+             	transform.gameObject.SendMessage("TakeDamage", 30);
+				Debug.Log("Ha dado a enemigo");
+         	}
+		}	
+		Debug.Log ("ya");
+		
 	}
 }
