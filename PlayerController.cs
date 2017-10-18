@@ -10,27 +10,34 @@ public class PlayerController : MonoBehaviour {
 	public Sprite spriteAtaque;
 	public Sprite spriteAndar;
 	public SpriteRenderer sr;
+	public Transform  posEscudo;
+	public GameObject shield;
 
-	private Sprite ChangeSprite;
 	private float currentSpeed;
 	private Rigidbody body;
-	private Animator anim;
+	//private Animator anim;
 	private bool onGround;
 	private bool isDead = false;
 	private bool facingRight = true;
 	private bool jump = false;
+	private SphereCollider CollEsfera;
 
-	private int hitRange = 10;
+
+	private bool IsCourutineExecuting = false;
+
+
+	//private int hitRange = 10;
 
 	RaycastHit hit;
 
 	// Use this for initialization
 	void Start () {
 		body = GetComponent<Rigidbody>();
-		anim = GetComponent <Animator>();
-		//ChangeSprite = GetComponent<Sprite>();
+		//anim = GetComponent <Animator>();
 		sr = GetComponent<SpriteRenderer>();
+		CollEsfera = GetComponent<SphereCollider>();
 		currentSpeed = maxSpeed;
+		CollEsfera.enabled = false;
 	}
 	
 	// Update is called once per frame
@@ -62,6 +69,21 @@ public class PlayerController : MonoBehaviour {
 		{
 			Debug.Log ("Atacando");
 			Attack();
+		}
+
+		//SHIELD
+
+		if (Input.GetButtonDown ("Fire2"))
+		{
+			Debug.Log ("Escudo");
+			Escudo();
+		}
+
+		//STUN
+		if (Input.GetButtonDown ("Fire2") && Input.GetButton ("Fire1") || Input.GetButtonDown ("Fire1") && Input.GetButton ("Fire2"))
+		{
+			Debug.Log ("Stun");
+			Stun();
 		}
 	}
 
@@ -116,12 +138,21 @@ public class PlayerController : MonoBehaviour {
 	void Attack()
 	{
 		RaycastHit hit1;
-		Vector3 forward =Vector3.up;
+		Vector3 forward = Vector3.up;
 		Vector3 origen = transform.position;
 
 		sr.sprite = spriteAtaque;
+		
+		int layerMask1 = 1 << 9;
 
-		if (Physics.Raycast(origen, forward, out hit1, hitRange))
+		//NO ENTRA EN EL if
+		if (Physics.Raycast(origen, forward, out hit1, 5, layerMask1)) 
+		{
+        Debug.DrawRay(origen, forward * hit1.distance, Color.black);
+        Debug.Log("Did Hit");
+    	}
+
+		/*if (Physics.Raycast(origen, forward, out hit1, hitRange))
 		{
 			Debug.Log("primer IF");
 			if (transform.gameObject.tag == "Enemy")
@@ -130,7 +161,44 @@ public class PlayerController : MonoBehaviour {
 				Debug.Log("Ha dado a enemigo");
          	}
 		}	
-		Debug.Log ("ya");
+		Debug.Log ("ya");*/
 		
+	}
+
+
+	void Escudo()
+	{
+		Instantiate (shield, posEscudo.position, Quaternion.identity);
+	}
+
+
+	IEnumerator ExecuteAfterTime (float time, bool active)
+	{
+		float tiempo = 2f;
+		if (IsCourutineExecuting)
+        yield break;
+ 
+     IsCourutineExecuting = true;
+ 
+     yield return new WaitForSeconds(time);
+  
+     // Code to execute after the delay
+ 
+     IsCourutineExecuting = false;
+		if (CollEsfera.enabled == false)
+		{
+			CollEsfera.enabled = true;
+		}
+		if (CollEsfera.enabled == true || time > tiempo)
+		{
+			CollEsfera.enabled = false;
+			active = true;
+		}
+		
+	}
+	void Stun()
+	{
+		if (ExecuteAfterTime.isActiveAndEnabled)
+		StartCoroutine ("ExecuteAfterTime");
 	}
 }
