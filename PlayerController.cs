@@ -6,13 +6,17 @@ public class PlayerController : MonoBehaviour {
 
 
 	public float maxSpeed = 4f;
-	public float jumpForce = 400f;
+	public float jumpForce = 5f;
 	public Sprite spriteAtaque;
 	public Sprite spriteAndar;
 	public SpriteRenderer sr;
-	public Transform  posEscudo;
-	public GameObject shield;
+	public Transform posEscudo;
+    public Transform posEscudoRanged;
+    public GameObject shield;
+	float tiempo = 0f;
 
+
+	private bool ColliderAtaqueActivado = false;
 	private float currentSpeed;
 	private Rigidbody body;
 	//private Animator anim;
@@ -20,10 +24,16 @@ public class PlayerController : MonoBehaviour {
 	private bool isDead = false;
 	private bool facingRight = true;
 	private bool jump = false;
-	private SphereCollider CollEsfera;
+	//private SphereCollider CollEsfera;
+	private BoxCollider ColliderAtaque;
 
 
-	private bool IsCourutineExecuting = false;
+	//VariablesAtaque
+	float damage = 5f;
+	bool Atacado = false;
+
+
+	//private bool IsCourutineExecuting = false;
 
 
 	//private int hitRange = 10;
@@ -35,9 +45,11 @@ public class PlayerController : MonoBehaviour {
 		body = GetComponent<Rigidbody>();
 		//anim = GetComponent <Animator>();
 		sr = GetComponent<SpriteRenderer>();
-		CollEsfera = GetComponent<SphereCollider>();
+		//CollEsfera = GetComponent<SphereCollider>();
+		ColliderAtaque = GetComponent <BoxCollider>();
+		ColliderAtaque.enabled = true;
 		currentSpeed = maxSpeed;
-		CollEsfera.enabled = false;
+		//CollEsfera.enabled = false;
 	}
 	
 	// Update is called once per frame
@@ -67,8 +79,14 @@ public class PlayerController : MonoBehaviour {
 
 		if (Input.GetButtonDown ("Fire1"))
 		{
-			Debug.Log ("Atacando");
+			Atacado = true;
+			sr.sprite = spriteAtaque;
 			Attack();
+		}
+		else if (Input.GetButtonUp ("Fire1"))
+		{
+			sr.sprite = spriteAndar;
+			Atacado = false;
 		}
 
 		//SHIELD
@@ -79,12 +97,27 @@ public class PlayerController : MonoBehaviour {
 			Escudo();
 		}
 
-		//STUN
+        //SHIELD COMPAÑERO
+        
+        if (Input.GetButtonDown ("Jump") && Input.GetButton ("Fire2") || Input.GetButton("Jump") && Input.GetButton("Fire2"))
+        {
+            PonerEscudoAmigo();
+            Debug.Log("PonerEscudoAmigo");
+        }
+
+		/*//STUN
 		if (Input.GetButtonDown ("Fire2") && Input.GetButton ("Fire1") || Input.GetButtonDown ("Fire1") && Input.GetButton ("Fire2"))
 		{
 			Debug.Log ("Stun");
+			tiempo = tiempo + Time.deltaTime;
+			//print (tiempo);
 			Stun();
-		}
+			if (CollEsfera.enabled == true || tiempo > 3f)
+			{
+				CollEsfera.enabled = false;
+				Debug.Log("SphereColliderDesactivado");
+			}
+		}*/
 	}
 
 	private void FixedUpdate()
@@ -134,15 +167,29 @@ public class PlayerController : MonoBehaviour {
 		scale.x *= -1;
 		transform.localScale = scale;
 	}
-
+	
 	void Attack()
 	{
-		RaycastHit hit1;
-		Vector3 forward = Vector3.up;
-		Vector3 origen = transform.position;
+		Atacado = true;
+	}
+	
+	void OnTriggerEnter (Collider ColliderAtaque)
+	{
+		if (ColliderAtaque.gameObject.GetComponent<Enemy>() && Atacado)
+		{
+			print ("Daño");
+		}
+		else
+		{
+			print("Mal");
+		}
+	
+	}	
 
-		sr.sprite = spriteAtaque;
-		
+
+//LO SIGUIENTE VA DENTRO DE ATAQUE
+/*
+
 		int layerMask1 = 1 << 9;
 
 		//NO ENTRA EN EL if
@@ -152,7 +199,7 @@ public class PlayerController : MonoBehaviour {
         Debug.Log("Did Hit");
     	}
 
-		/*if (Physics.Raycast(origen, forward, out hit1, hitRange))
+		if (Physics.Raycast(origen, forward, out hit1, hitRange))
 		{
 			Debug.Log("primer IF");
 			if (transform.gameObject.tag == "Enemy")
@@ -162,25 +209,33 @@ public class PlayerController : MonoBehaviour {
          	}
 		}	
 		Debug.Log ("ya");*/
-		
-	}
-
+//HASTA AQUI
 
 	void Escudo()
 	{
-		Instantiate (shield, posEscudo.position, Quaternion.identity);
+		GameObject EscudoShield;
+		EscudoShield = GameObject.Find ("Shield(Clone)");
+		if (!EscudoShield)
+		{
+			Instantiate (shield, posEscudo.position, Quaternion.identity);
+		}
+		else
+		{
+			print("Hay Escudo");
+		}
+		
 	}
 
-
-	IEnumerator ExecuteAfterTime (float time, bool active)
+/*
+	IEnumerator ExecuteAfterTime ()
 	{
-		float tiempo = 2f;
+		double tiempo = 0.1;
 		if (IsCourutineExecuting)
         yield break;
  
      IsCourutineExecuting = true;
  
-     yield return new WaitForSeconds(time);
+     yield return new WaitForSeconds(2);
   
      // Code to execute after the delay
  
@@ -189,16 +244,28 @@ public class PlayerController : MonoBehaviour {
 		{
 			CollEsfera.enabled = true;
 		}
-		if (CollEsfera.enabled == true || time > tiempo)
+		if (CollEsfera.enabled == true || Time.frameCount > tiempo)
 		{
 			CollEsfera.enabled = false;
-			active = true;
+			Debug.Log("si");
 		}
 		
 	}
-	void Stun()
+*/	/*void Stun()
 	{
-		if (ExecuteAfterTime.isActiveAndEnabled)
-		StartCoroutine ("ExecuteAfterTime");
-	}
+		//StartCoroutine(ExecuteAfterTime());
+		if (CollEsfera.enabled == false)
+		{
+			CollEsfera.enabled = true;
+			Debug.Log ("SphereColliderActivado");
+		}
+	}*/
+
+
+    void PonerEscudoAmigo()
+    {
+        Instantiate (shield, posEscudoRanged.position, Quaternion.identity);
+    }
+
+
 }
