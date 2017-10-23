@@ -6,10 +6,12 @@ public class CollAtaqueEnemigo : MonoBehaviour {
 
 
 	private Animator anim;
+	Enemy ScriptEnemy;
 
 	// Use this for initialization
 	void Start () {
 		anim = GetComponentInParent<Animator>();
+		ScriptEnemy = GetComponentInParent <Enemy>();
 	}
 	
 	// Update is called once per frame
@@ -17,12 +19,12 @@ public class CollAtaqueEnemigo : MonoBehaviour {
 		
 	}
 
-	void OnTriggerEnter (Collider other)
+	void OnTriggerEnter2D (Collider2D other)
 	{
-		if (other.gameObject.GetComponent<PlayerController2D>())
+		if (other.tag == "Player")
 		{
 			print (message: "DentroDeTrigger");
-			anim.SetTrigger("Atacar");
+			ScriptEnemy.Ataque();
 		}
 	}
 }

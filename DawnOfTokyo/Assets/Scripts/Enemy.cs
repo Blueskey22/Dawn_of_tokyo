@@ -13,7 +13,13 @@ public class Enemy : MonoBehaviour {
   RaycastHit2D hitAtaque;
   private bool facingRight = true;
 
-  RaycastHit2D hit;
+    [SerializeField]
+    private float contador;
+    [SerializeField]
+    private bool  ha_Atacado = false;
+    [SerializeField]
+    public bool ha_Dado = false;
+
 
    // public GameObject Pos_personaje;
 void Start()
@@ -24,12 +30,12 @@ void Start()
 
 void Update()
 {
-    Movement();
+   
 }
 
 void FixedUpdate()
 {
-
+     Movement();
 }
 
 
@@ -73,8 +79,30 @@ void Flip()
     transform.localScale = scale;
 }
 
-void Ataque()
+public void Ataque()
 {
-
+    contador = contador + Time.deltaTime;
+    if (scriptPlayer.isDead == false)
+    {
+        if (!ha_Atacado && contador >= 0.009f)
+        {
+            print ("Hola");
+            anim.SetTrigger("Atacar");
+            if (ha_Dado)
+            {
+            contador = 0f;
+            }
+            ha_Atacado = true; 
+        }
+        else
+        {
+            return;
+        }
+    }
+    print("J");
+    anim.SetTrigger("Idle");
 }
+
+
+
 }
