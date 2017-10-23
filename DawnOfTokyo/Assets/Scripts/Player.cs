@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour {
-
-
+public class Player : MonoBehaviour 
+{
 	Rigidbody body;
 	public float vel;
 
+	//Animator anim;
 
 	private bool _jumped = false;
    	public float jumpForce = 3f;
@@ -18,11 +18,17 @@ public class Player : MonoBehaviour {
     {
         body = GetComponent<Rigidbody>();
         _distToGround = GetComponent<Collider>().bounds.extents.y;
+		//anim = GetComponent<Animator>();
     }
 
     // Update is called once per frame
-    void FixedUpdate () {
-		
+
+	void Update ()
+	{
+		//Attack();
+	}
+    void FixedUpdate () 
+	{		
 		float h = Input.GetAxis ("Horizontal");
 		float v = Input.GetAxis ("Vertical");
 
@@ -31,22 +37,44 @@ public class Player : MonoBehaviour {
 			body.velocity = new Vector3 (vel * h, 0, vel * v);
 		}
 
-		  if (isGrounded()) {
-             if (Input.GetButton("Jump")) {
-                 jump();
-             }
-         }
+		if (isGrounded()) 
+		{
+            if (Input.GetButton("Jump")) 
+			{
+            	jump();
+            }
+        }
 	}
-	void jump() {
+	void jump() 
+	{
          Debug.Log("jumping");
-         if (!_jumped) {
+         if (!_jumped) 
+		 {
              _jumped = true;
              Vector3 force = transform.up * jumpForce;
              body.AddRelativeForce(force, ForceMode.Impulse);
          }
          _jumped = false;
      }
-	     bool isGrounded() {
-         return Physics.Raycast(transform.position, -Vector3.up, _distToGround + .1F);
-     }
+	bool isGrounded() 
+	{
+    	return Physics.Raycast(transform.position, -Vector3.up, _distToGround + .1F);
+    }
+
+
+
+	/*void Attack ()
+	{
+		if (Input.GetButtonDown ("Fire1"))
+		{
+			anim.SetBool ("Atacar", true);
+			anim.SetBool ("Idle", false);
+		}
+		else
+		{
+			anim.SetBool ("Atacar", false);
+			anim.SetBool ("Idle", true);
+		}
+	}*/
+
 }
